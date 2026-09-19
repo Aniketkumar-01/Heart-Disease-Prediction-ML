@@ -1,14 +1,15 @@
 # Heart Disease Prediction Model using ML
 
-**Author**: Aniket Kumar  
-**Program**: IBM SkillsBuild Data Analytics with AI Academic Internship Program (conducted by BharatCares in association with AICTE)
+**Author**: Aniket Kumar
+
 
 ## Project Overview
 This project focuses on building a Machine Learning pipeline to predict the risk of heart disease based on clinical parameters. By analyzing various medical indicators (such as age, blood pressure, cholesterol levels, etc.), the model predicts whether a patient is at risk for heart disease, aiding in early diagnosis and proactive healthcare.
 
 ## Dataset
 The project utilizes the **UCI Heart Disease Dataset** (Cleveland).
-* **Dataset Link**: [UCI Machine Learning Repository - Heart Disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
+* **Kaggle Link**: [Heart Disease Cleveland Dataset](https://www.kaggle.com/datasets/ritwikb3/heart-disease-cleveland)
+* **UCI Link**: [UCI Machine Learning Repository - Heart Disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
 
 ## Technologies Used
 * **Programming Language**: Python

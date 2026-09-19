@@ -11,6 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
                              precision_score, recall_score, roc_auc_score)
 from sklearn.model_selection import train_test_split
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
@@ -52,7 +53,7 @@ def build_models():
         "Logistic Regression": LogisticRegression(max_iter=1000),
         "MLP": MLPClassifier(hidden_layer_sizes=(32, 16), max_iter=1000, random_state=42),
         "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42),
-        "SVC": SVC(probability=True, random_state=42),
+        "SVC": CalibratedClassifierCV(SVC(random_state=42), ensemble=False),
         **({"XGBoost": XGBClassifier(eval_metric="logloss", random_state=42)}
            if XGBClassifier else {}),
     }
