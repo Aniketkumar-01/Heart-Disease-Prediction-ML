@@ -15,6 +15,7 @@ The project utilizes the **UCI Heart Disease Dataset** (Cleveland).
 * **Libraries/Frameworks**: 
   * `pandas` and `numpy` for data manipulation and preprocessing
   * `scikit-learn` for machine learning algorithms, evaluation metrics, and preprocessing pipelines
+  * `streamlit` for the interactive web user interface
   * `xgboost` (optional) for gradient boosting models
   * Jupyter Notebook for interactive data exploration and model development
 
