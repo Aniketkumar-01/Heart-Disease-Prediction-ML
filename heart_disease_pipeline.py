@@ -1,14 +1,5 @@
-"""
-Heart disease prediction pipeline (Cleveland dataset)
-
-Reproduces the project notebook as a script and adds:
-  * predict_record()  - inference for one new patient
-  * export_json()     - exports the trained models for the browser UI
-                        (heart_disease_predictor.html) and for parity tests
-
-Usage:
-    python heart_disease_pipeline.py --data data.csv --out model.json
-"""
+# Heart Disease Prediction Pipeline using the Cleveland dataset
+# This script trains the models and can export them for the UI.
 import argparse
 import json
 import warnings
@@ -36,10 +27,9 @@ CONTINUOUS = ["age", "trestbps", "chol", "thalach", "oldpeak"]
 EXPORTABLE = {"Random Forest": "rf", "Logistic Regression": "lr", "MLP": "mlp"}
 
 
-# ----------------------------------------------------------------- preprocessing
+# Data Preprocessing
 def iqr_bounds(df, cols=CAP_COLS):
-    """IQR capping bounds (Eq. 1-2). As in the notebook they are computed on the
-    full dataset before the split."""
+    # Calculate bounds for capping outliers
     out = {}
     for c in cols:
         q1, q3 = df[c].quantile(.25), df[c].quantile(.75)
@@ -49,7 +39,7 @@ def iqr_bounds(df, cols=CAP_COLS):
 
 
 def clean(df, bounds):
-    """Cap outliers and log-transform oldpeak (Eq. 2-3). Returns a copy."""
+    # Handle outliers and apply log transform to oldpeak
     df = df.copy()
     for c, (lo, hi) in bounds.items():
         df[c] = df[c].clip(lo, hi)
@@ -68,9 +58,9 @@ def build_models():
     }
 
 
-# ----------------------------------------------------------------- training
+# Model Training
 def train(data_path):
-    """Train all models. Returns an 'artifacts' dict used by everything else."""
+    # Train models and return the artifacts
     raw = pd.read_csv(data_path)
     bounds = iqr_bounds(raw)
     data = clean(raw, bounds)
@@ -96,27 +86,27 @@ def train(data_path):
                 n_train=len(X_tr), n_test=len(X_te))
 
 
-# ----------------------------------------------------------------- inference
+# Inference Functions
 def transform_record(art, record):
-    """record: dict with the 13 raw attributes -> scaled 1x13 array."""
+    # Scale a single patient record
     df = pd.DataFrame([{f: float(record[f]) for f in FEATURES}])
     return art["scaler"].transform(clean(df, art["bounds"])[FEATURES].values)
 
 
 def predict_record(art, record, model="Random Forest"):
-    """Probability of heart disease for one raw patient record."""
+    # Get heart disease probability for a patient
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         return float(art["models"][model].predict_proba(transform_record(art, record))[0, 1])
 
 
 def typical_patient(raw):
-    """Median for measurements, most frequent category otherwise."""
+    # Get the typical patient profile
     return {c: (float(raw[c].median()) if c in CONTINUOUS else int(raw[c].mode()[0]))
             for c in FEATURES}
 
 
-# ----------------------------------------------------------------- export for UI
+# Export Models for UI
 def _pick_examples(art):
     raw, te = art["raw"], art["X_test"].index
     rows = raw.loc[te].copy()
@@ -124,8 +114,12 @@ def _pick_examples(art):
     low = rows[rows.target == 0].sort_values("p").iloc[2]
     high = rows[rows.target == 1].sort_values("p").iloc[-3]
     mid = rows[(rows.p > .4) & (rows.p < .6)].iloc[0]
-    conv = lambda r: {**{c: (float(r[c]) if c == "oldpeak" else int(r[c])) for c in FEATURES},
-                      "actual": int(r.target), "p": float(r.p)}
+    def conv(r):
+        record = {c: (float(r[c]) if c == "oldpeak" else int(r[c])) for c in FEATURES}
+        record["actual"] = int(r.target)
+        record["p"] = float(r.p)
+        return record
+        
     return {"low": conv(low), "high": conv(high), "borderline": conv(mid)}
 
 
@@ -160,7 +154,7 @@ def export_json(art, path):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(description="Heart Disease Prediction Pipeline")
     ap.add_argument("--data", default="data.csv")
     ap.add_argument("--out", default="model.json")
     a = ap.parse_args()

@@ -1,9 +1,5 @@
-"""Streamlit version of the heart disease predictor.
-
-Run:  pip install streamlit scikit-learn pandas numpy
-      streamlit run app.py
-Expects data.csv next to this file.
-"""
+# Heart Disease Risk Predictor - Streamlit App
+# Requires data.csv in the same directory.
 import pandas as pd
 import streamlit as st
 
@@ -65,11 +61,20 @@ with right:
     if .35 <= p <= .65:
         st.warning("Borderline: the model is close to undecided.")
     st.write("**All models**")
-    st.dataframe(pd.DataFrame(
-        [{"Model": m, "Probability": f"{hp.predict_record(art, rec, m):.0%}",
-          "Verdict": "Indicated" if hp.predict_record(art, rec, m) >= .5 else "Not indicated"}
-         for m in ["Random Forest", "Logistic Regression", "MLP"]]), hide_index=True)
-    # occlusion sensitivity: swap each value for the typical patient's value
+    # Get metrics mapping for quick lookup
+    metrics_map = {m["model"]: m["acc"] for m in art["metrics"]}
+    
+    table_data = []
+    for m in ["Random Forest", "Logistic Regression", "MLP"]:
+        prob = hp.predict_record(art, rec, m)
+        table_data.append({
+            "Model": m, 
+            "Test Accuracy": f"{metrics_map.get(m, 0):.1%}",
+            "Probability": f"{prob:.0%}",
+            "Verdict": "Indicated" if prob >= .5 else "Not indicated"
+        })
+    st.dataframe(pd.DataFrame(table_data), hide_index=True)
+    # Calculate feature impact (change in probability vs typical patient)
     drv = sorted(((f, p - hp.predict_record(art, {**rec, f: typ[f]}, choice)) for f in hp.FEATURES),
                  key=lambda t: -abs(t[1]))[:6]
     st.write("**What is driving this prediction** (change in probability vs a typical patient)")
